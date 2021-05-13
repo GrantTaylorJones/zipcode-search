@@ -1,15 +1,15 @@
 package com.grant.jones.zipcodesearch.controllers;
 
+import com.grant.jones.zipcodesearch.exceptions.ZipcodeNotFoundException;
 import com.grant.jones.zipcodesearch.models.FullZipcode;
 import com.grant.jones.zipcodesearch.models.Zipcode;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
 //import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -86,11 +86,16 @@ import java.util.Map;
 
         }
 
-        @PostMapping("/zipcode")
+        @GetMapping("/zipcode")
         //@Transactional(timeout = 600000)
         public Zipcode zipcodeLookup(@RequestBody Zipcode input) {
-
-            return zipCodeMap.get(input.getZipcode());
+            if (zipCodeMap.containsKey(input.getZipcode())){
+                return zipCodeMap.get(input.getZipcode());
+            }else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Zipcode not found or is invalid syntax",
+                        new ZipcodeNotFoundException());
+            }
         }
 
 
